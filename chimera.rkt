@@ -6,11 +6,12 @@
 (require racket)
 
 (define (chimera-entry program)
-  (pretty-print (first (first (third program))))
+  (pretty-print (first (third program)))
   (let ([ctx (hash 'distance 0
-                   'lambdas (map first (third program)))])
+                   'lambdas (map (lambda (x) (first (first x)))
+                                 (third program)))])
     (cons (chimera-compile (first (first program)) '() ctx)
-          (map (lambda (s) (chimera-compile (rest s) '() ctx))
+          (map (lambda (s) (chimera-compile (rest (first s)) '() ctx))
                (third program)))))
   
 (define (chimera-compile block emission ctx)
