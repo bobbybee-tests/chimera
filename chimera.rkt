@@ -9,9 +9,14 @@
   (pretty-print (first (third program)))
   (let ([ctx (hash 'distance 0
                    'lambdas (map (lambda (x) (first (first x)))
-                                 (third program)))])
+                                 (third program))
+                   'ssize (fourth program))])
     (cons (chimera-compile (first (first program)) '() ctx)
-          (map (lambda (s) (chimera-compile (rest (first s)) '() ctx))
+          (map (lambda (s) (chimera-compile (rest (first s))
+                                            '()
+                                            (hash-set ctx
+                                                      'ssize
+                                                      (second s)))
                (third program)))))
   
 (define (chimera-compile block emission ctx)
