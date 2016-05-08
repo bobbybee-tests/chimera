@@ -33,6 +33,12 @@
     [(else) (display "Unknown target")]))
 
 (define (chimera-expression value ctx)
+  (case (first value)
+    [("call") (chimera-call value ctx)]
+    [(else) (display "Unknown value type")]))
+
+(define (chimera-call value ctx)
+  (pretty-print value)
   (list 42 '() ctx))
 
 (pretty-print (chimera-entry (first (rest (read)))))
