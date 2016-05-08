@@ -18,14 +18,19 @@
 
 (define (chimera-line line ctx)
   (if (equal? (first line) "=")
-    (let ([expression (chimera-expression line ctx)])
-      (list (cons (list "setLine:ofList:to:"
-                        (list "readVariable" "sp") ; TODO: calculate differences
-                        "memory"
-                        (first expression))
-                  (second expression))
-            (third expression)))
+    (let* ([expression (chimera-expression (third line) ctx)])
+      (chimera-target (second line) ctx expression))
     (display "Unknown command\n")))
+
+(define (chimera-target target ctx value)
+  (case (first target)
+    [("stack") (list (cons (list "setLine:ofList:to:"
+                                 (list "readVariable" "sp")
+                                 "memory"
+                                 (first value))
+                           (second value))
+                     (third value))]
+    [(else) (display "Unknown target")]))
 
 (define (chimera-expression value ctx)
   (list 42 '() ctx))
