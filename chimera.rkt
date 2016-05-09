@@ -7,7 +7,10 @@
 
 (define (chimera-entry program)
   (pretty-print program)
-  (chimera-compile (first (first program)) '() (hash 'distance 0)))
+  (chimera-compile (first (first program))
+                   '()
+                   (hash 'distance 0
+                         'lambdas (map first (third program)))))
 
 (define (chimera-compile block emission ctx)
   (if (empty? block)
