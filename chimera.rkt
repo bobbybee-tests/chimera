@@ -45,9 +45,17 @@
 
 (define (chimera-call value ctx)
   (let ([args (map (lambda (x) (chimera-identifier x ctx))
-                   (rest value))])
-    (pretty-print args)
-    (list 42 '() ctx)))
+                   (cddr value))])
+    (if (eq? (first (second value)) "lambda")
+      (let* ([l (nth-ref (hash-ref ctx 'lambdas) (second (second value)))]
+             [formatted-args (chimera-arg-format l args ctx)]
+             [nctx (third formatted-args)]
+             [spec (chimera-lambda-spec (second (second value)) l)])
+        (list (list "readVariable" "return")
+              (cons (cons "call" (cons spec (first formatted-args)))
+                    (second formatted-args))
+              nctx))
+      (display "Unknown other type of function call :P"))))
 
 (define (chimera-identifier identifier ctx)
   (pretty-print ctx)
