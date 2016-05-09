@@ -6,6 +6,7 @@
 (require racket)
 
 (define (chimera-entry program)
+  (pretty-print program)
   (chimera-compile (first (first program)) '() (hash 'distance 0)))
 
 (define (chimera-compile block emission ctx)
@@ -37,8 +38,18 @@
     [("call") (chimera-call value ctx)]
     [(else) (display "Unknown value type")]))
 
+; (identifier prefix ctx)
+
 (define (chimera-call value ctx)
-  (pretty-print value)
-  (list 42 '() ctx))
+  (let ([args (map (lambda (x) (chimera-identifier x ctx))
+                   (rest value))])
+    (pretty-print args)
+    (list 42 '() ctx)))
+
+(define (chimera-identifier identifier ctx)
+  (pretty-print ctx)
+  (case (first identifier)
+    [("imm") (second identifier)]
+    [("global") "global"]))
 
 (pretty-print (chimera-entry (first (rest (read)))))
