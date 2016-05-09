@@ -58,10 +58,11 @@
       (display "Unknown other type of function call :P\n"))))
 
 (define (chimera-arg-format l args ctx)
-  (display "YO: \n")
-  (pretty-print l)
-  (pretty-print args)
-  (pretty-print ctx))
+  (if (member '..... l)
+    (list "TODO impartial")
+    (if (member '... l)
+      (list "TODO variadic")
+      (list args '() ctx))))
 
 (define (chimera-lambda-spec n l)
   (pretty-print n)
