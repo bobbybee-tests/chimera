@@ -52,18 +52,19 @@
     (if (equal? (first (second value)) "lambda")
       (let* ([l (list-ref (hash-ref ctx 'lambdas) (second (second value)))]
              [formatted-args (chimera-arg-format l args ctx)]
-             [nctx (third formatted-args)]
              [spec (chimera-lambda-spec (second (second value)) l)])
         (list (list "readVariable" "return")
               (cons (cons "call" (cons spec (first formatted-args)))
                     (second formatted-args))
-              nctx))
+              (third formatted-args)))
       (if (chimera-primitive (second (second value)))
         '()
         (let* ([l (chimera-identifier (second value) ctx)]
                [push (chimera-push-list args ctx '())])
-          (pretty-print push)
-          (pretty-print args))))))
+          (list (list "readVariable" "return")
+                (cons (list "call" "call" l (length args))
+                      (first push))
+                (second push)))))))
 
 (define (chimera-arg-format l args ctx)
   (if (member '..... l)
