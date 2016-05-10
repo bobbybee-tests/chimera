@@ -58,7 +58,12 @@
               (cons (cons "call" (cons spec (first formatted-args)))
                     (second formatted-args))
               nctx))
-      (display "Unknown other type of function call :P\n"))))
+      (if (chimera-primitive (second (second value)))
+        '()
+        (let* ([l (chimera-identifier (second value) ctx)]
+               [push (chimera-push-list args ctx '())])
+          (pretty-print push)
+          (pretty-print args))))))
 
 (define (chimera-arg-format l args ctx)
   (if (member '..... l)
@@ -80,5 +85,19 @@
   (case (first identifier)
     [("imm") (second identifier)]
     [("global") "global"]))
+
+(define (chimera-primitive name)
+  #f)
+
+(define (chimera-push-list lst ctx emission)
+  (if (empty? lst)
+    (list emission ctx)
+    (chimera-push-list (rest lst)
+                       (hash-set ctx 'distance (+ (hash-ref ctx 'distance) 1))
+                       (cons (list "setLine:ofList:to:"
+                                   (list "readVariable" "sp")
+                                   "memory"
+                                   (first lst))
+                             emission))))
 
 (pretty-print (chimera-entry (first (rest (read)))))
