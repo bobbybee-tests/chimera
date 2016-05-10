@@ -17,7 +17,7 @@
   (display "Block: \n")
   (pretty-print block)
   (if (empty? block)
-    (list emission ctx)
+    (list (reverse emission) ctx)
     (let ([line (chimera-line (first block) ctx)])
       (chimera-compile (rest block)
                        (append (first line) emission)
