@@ -37,14 +37,22 @@
                                  (first value))
                            (second value))
                      (third value))]
-    [(else) (display "Unknown target")]))
+    [(else) (display "Unknown target\n")]))
 
 (define (chimera-expression value ctx)
   (case (first value)
     [("call") (chimera-call value ctx)]
-    [(else) (display "Unknown value type")]))
+    [("stack") (chimera-access-stack value ctx)]
+    [(else) (display "Unknown value type\n")]))
 
 ; (identifier prefix ctx)
+
+(define (chimera-access-stack value ctx)
+  (list (list "getLine:ofList:"
+              (list "readVariable" "sp")
+              "memory")
+        '()
+        ctx))
 
 (define (chimera-call value ctx)
   (let ([args (map (lambda (x) (chimera-identifier x ctx))
