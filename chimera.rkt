@@ -65,11 +65,15 @@
       (list args '() ctx))))
 
 (define (chimera-lambda-spec n l)
-  (pretty-print n)
-  (pretty-print l))
+  (if (member '..... l)
+   (list "TODO impartial")
+   (if (member '... l)
+     (list "TODO variadic")
+     (string-join (cons "lambda"
+                        (cons (number->string n)
+                              (build-list (length l) (lambda (x) "%n"))))))))
 
 (define (chimera-identifier identifier ctx)
-  (pretty-print ctx)
   (case (first identifier)
     [("imm") (second identifier)]
     [("global") "global"]))
