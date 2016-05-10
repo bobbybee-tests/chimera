@@ -37,6 +37,11 @@
                                  (first value))
                            (second value))
                      (third value))]
+    [("return") (list (cons (list "setVar:to:"
+                                  "return"
+                                  (first value))
+                            (second value))
+                      (third value))]
     [(else) (display "Unknown target\n")]))
 
 (define (chimera-expression value ctx)
