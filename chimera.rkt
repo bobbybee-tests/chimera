@@ -108,10 +108,13 @@
     (list emission ctx)
     (chimera-push-list (rest lst)
                        (hash-set ctx 'distance (+ (hash-ref ctx 'distance) 1))
-                       (cons (list "setLine:ofList:to:"
-                                   (list "readVariable" "sp")
-                                   "memory"
-                                   (first lst))
-                             emission))))
+                       (cons (list "changeVariable"
+                                   "sp"
+                                   1)
+                             (cons (list "setLine:ofList:to:"
+                                         (list "readVariable" "sp")
+                                         "memory"
+                                         (first lst))
+                                   emission)))))
 
 (pretty-print (chimera-entry (first (rest (read)))))
