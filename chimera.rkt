@@ -29,13 +29,18 @@
       (chimera-target (second line) ctx expression))
     (display "Unknown command\n")))
 
+; this is broken; rewrite later to be better
+
 (define (chimera-target target ctx value)
   (case (first target)
-    [("stack") (list (cons (list "setLine:ofList:to:"
-                                 (list "readVariable" "sp")
-                                 "memory"
-                                 (first value))
-                           (second value))
+    [("stack") (list (cons (list "changeVariable"
+                                 "sp"
+                                 1)
+                           (cons (list "setLine:ofList:to:"
+                                       (list "readVariable" "sp")
+                                       "memory"
+                                       (first value))
+                                 (second value)))
                      (third value))]
     [("return") (list (cons (list "setVar:to:"
                                   "return"
