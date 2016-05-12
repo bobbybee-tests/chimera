@@ -51,10 +51,7 @@
   (pretty-print ctx)
   (case (first target)
     [("stack") (list (cons (list "setLine:ofList:to:"
-                                 (list "-"
-                                       (list "readVariable" "sp") 
-                                       (- (hash-ref ctx 'ssize)
-                                          (second target)))
+                                 (chimera-calculate-stack (second target) ctx)
                                  "memory"
                                  (first value))
                            (second value))
@@ -69,13 +66,16 @@
 (define (chimera-expression value ctx)
   (case (first value)
     [("call") (chimera-call value ctx)]
-    [("stack") (list (chimera-access-stack value ctx) '() ctx)]
+    [("stack") (list (chimera-access-stack (second value) ctx) '() ctx)]
     [(else) (display "Unknown value type\n")]))
 
 ; (identifier prefix ctx)
 
+(define (chimera-calculate-stack value ctx)
+  (list "-" (list "readVariable" "sp") (- (hash-ref ctx 'ssize) value)))
+
 (define (chimera-access-stack value ctx)
-  (list "getLine:ofList:" (list "readVariable" "sp") "memory"))
+  (list "getLine:ofList:" (chimera-calculate-stack value ctx) "memory"))
 
 (define (chimera-call value ctx)
   (let ([args (map (lambda (x) (chimera-identifier x ctx))
