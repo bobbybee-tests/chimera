@@ -69,17 +69,13 @@
 (define (chimera-expression value ctx)
   (case (first value)
     [("call") (chimera-call value ctx)]
-    [("stack") (chimera-access-stack value ctx)]
+    [("stack") (list (chimera-access-stack value ctx) '() ctx)]
     [(else) (display "Unknown value type\n")]))
 
 ; (identifier prefix ctx)
 
 (define (chimera-access-stack value ctx)
-  (list (list "getLine:ofList:"
-              (list "readVariable" "sp")
-              "memory")
-        '()
-        ctx))
+  (list "getLine:ofList:" (list "readVariable" "sp") "memory"))
 
 (define (chimera-call value ctx)
   (let ([args (map (lambda (x) (chimera-identifier x ctx))
@@ -121,7 +117,9 @@
   (case (first identifier)
     [("imm") (second identifier)]
     [("global") "global"]
-    [("closure") (chimera-resolve-closure (second identifier) ctx)]))
+    [("closure") (chimera-resolve-closure (second identifier) ctx)]
+    [("stack") (chimera-access-stack (second identifier) ctx)]
+    [else (pretty-print identifier)]))
 
 (define (chimera-resolve-closure identifier ctx)
   (pretty-print ctx) ;TODO
