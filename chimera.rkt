@@ -11,23 +11,31 @@
                    'lambdas (map (lambda (x) (first (first x)))
                                  (third program))
                    'ssize (fourth program))])
-    (cons (chimera-compile (first (first program)) '() ctx)
+    (cons (chimera-compile (first (first program)) ctx)
           (map (lambda (s) (chimera-compile (rest (first s))
-                                            '()
                                             (hash-set ctx
                                                       'ssize
-                                                      (second s)))
+                                                      (second s))))
                (third program)))))
   
-(define (chimera-compile block emission ctx)
+(define (chimera-compile block ctx)
+  (chimera-compile-internal block
+                            (list (list "changeVariable"
+                                        "sp"
+                                        (- (hash-ref ctx 'ssize))))
+                            ctx))
+
+(define (chimera-compile-internal block emission ctx)
   (display "Block: \n")
   (pretty-print block)
   (if (empty? block)
-    (list (reverse emission) ctx)
+    (list (reverse (cons (list "changeVariable" "sp" (hash-ref ctx 'ssize))
+                         emission))
+          ctx)
     (let ([line (chimera-line (first block) ctx)])
-      (chimera-compile (rest block)
-                       (append (first line) emission)
-                       (second line)))))
+      (chimera-compile-internal (rest block)
+                                (append (first line) emission)
+                                (second line)))))
 
 (define (chimera-line line ctx)
   (if (equal? (first line) "=")
@@ -38,15 +46,15 @@
 ; this is broken; rewrite later to be better
 
 (define (chimera-target target ctx value)
+  (display "YO: ")
+  (pretty-print target)
+  (pretty-print ctx)
   (case (first target)
-    [("stack") (list (cons (list "changeVariable"
-                                 "sp"
-                                 1)
-                           (cons (list "setLine:ofList:to:"
-                                       (list "readVariable" "sp")
-                                       "memory"
-                                       (first value))
-                                 (second value)))
+    [("stack") (list (cons (list "setLine:ofList:to:"
+                                 (list "readVariable" "sp")
+                                 "memory"
+                                 (first value))
+                           (second value))
                      (third value))]
     [("return") (list (cons (list "setVar:to:"
                                   "return"
