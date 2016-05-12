@@ -51,7 +51,10 @@
   (pretty-print ctx)
   (case (first target)
     [("stack") (list (cons (list "setLine:ofList:to:"
-                                 (list "readVariable" "sp")
+                                 (list "-"
+                                       (list "readVariable" "sp") 
+                                       (- (hash-ref ctx 'ssize)
+                                          (second target)))
                                  "memory"
                                  (first value))
                            (second value))
