@@ -12,15 +12,35 @@
                                  (third program))
                    'ssize (fourth program))])
     (cons (chimera-compile (first (first program)) ctx)
-          (map (lambda (s) (chimera-compile (rest (first s))
-                                            (hash-set ctx
-                                                      'ssize
-                                                      (first (second s)))))
-               (third program)))))
+          (chimera-lambdas (third program) ctx '() 0))))
   
+(define (chimera-lambdas lambdas ctx emission n)
+  (display "asd\n")
+  (pretty-print lambdas)
+  (if (empty? lambdas)
+    emission
+    (let ([l (first lambdas)])
+      (display "S\n")
+      (pretty-print (first l))
+      (display "R\n")
+      (pretty-print (rest l))
+      (chimera-lambdas (rest lambdas)
+                       ctx
+                       (cons (cons (list "procDef"
+                                         (chimera-lambda-spec n (first (first l)))
+                                         (chimera-arg-names (first (first l)))
+                                         (chimera-arg-defaults (first (first l)))
+                                         #f)
+                                   (chimera-compile (rest (first l))
+                                                    (hash-set ctx
+                                                              'ssize
+                                                              (first (second l)))))
+                             emission)
+                       (+ n 1)))))
+
 (define (chimera-compile block ctx)
   (chimera-compile-internal block
-                            (list (list "changeVariable"
+                            (list (list "changeVar:by:"
                                         "sp"
                                         (- (hash-ref ctx 'ssize))))
                             ctx))
@@ -29,7 +49,7 @@
   (display "Block: \n")
   (pretty-print block)
   (if (empty? block)
-    (list (reverse (cons (list "changeVariable" "sp" (hash-ref ctx 'ssize))
+    (list (reverse (cons (list "changeVar:by:" "sp" (hash-ref ctx 'ssize))
                          emission))
           ctx)
     (let ([line (chimera-line (first block) ctx)])
@@ -97,6 +117,16 @@
                       (first push))
                 (second push)))))))
 
+(define (chimera-arg-names l)
+  (if (member '..... l)
+    (list "TODO impartial")
+    (if (member '... l)
+      (list "TODO variadic")
+      l)))
+
+(define (chimera-arg-defaults l)
+  (map (lambda (x) 0) (chimera-arg-names l)))
+
 (define (chimera-arg-format l args ctx)
   (if (member '..... l)
     (list "TODO impartial")
@@ -133,7 +163,7 @@
     (list emission ctx)
     (chimera-push-list (rest lst)
                        (hash-set ctx 'distance (+ (hash-ref ctx 'distance) 1))
-                       (cons (list "changeVariable"
+                       (cons (list "changeVar:by:"
                                    "sp"
                                    1)
                              (cons (list "setLine:ofList:to:"
