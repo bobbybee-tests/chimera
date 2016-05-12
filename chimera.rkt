@@ -120,7 +120,12 @@
 (define (chimera-identifier identifier ctx)
   (case (first identifier)
     [("imm") (second identifier)]
-    [("global") "global"]))
+    [("global") "global"]
+    [("closure") (chimera-resolve-closure (second identifier) ctx)]))
+
+(define (chimera-resolve-closure identifier ctx)
+  (pretty-print ctx) ;TODO
+  (list "getParam" identifier))
 
 (define (chimera-primitive name)
   #f)
