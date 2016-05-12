@@ -15,7 +15,7 @@
           (map (lambda (s) (chimera-compile (rest (first s))
                                             (hash-set ctx
                                                       'ssize
-                                                      (second s))))
+                                                      (first (second s)))))
                (third program)))))
   
 (define (chimera-compile block ctx)
