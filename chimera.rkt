@@ -191,9 +191,16 @@
 (define (chimera-dispatch-lambda l n)
   (display "Senor lambda: \n")
   (display n)
-  (pretty-print l)
 
   ; TODO: arguments in order, in conformance to variadic functions
-  (list (list "call" (chimera-lambda-spec n l))))
+  (list (append (list "call" (chimera-lambda-spec n l))
+                (chimera-dispatch-unpack (first (first l))))))
+
+(define (chimera-dispatch-unpack args)
+  (if (member '..... args)
+    (list "TODO impartial")
+    (if (member '... args)
+      (list "TODO variadic")
+      args)))
 
 (pretty-print (chimera-entry (first (rest (read)))))
