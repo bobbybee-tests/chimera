@@ -210,9 +210,7 @@
     (list "TODO impartial")
     (if (member '... args)
       (list "TODO variadic")
-      (xmap (lambda (x n) (list "getLine:ofList:"
-                                (list "-" (list "readVariable" "sp") n)
-                                "memory")) args))))
+      (xmap (lambda (x n) (chimera-vary-arg n)) args))))
 
 ; primitives are implemented a bit more roundabout
 ; this is to ensure that they can be called by reference correct
@@ -224,7 +222,26 @@
   (case prim
     [("+" "-" "*" "/") (chimera-arithm-vary prim)]))
 
+(define (chimera-vary-arg n)
+  (list "getLine:ofList:" (list "-" (list "readVariable" "sp") n) "memory"))
+
 (define (chimera-arithm-vary prim)
-  (pretty-print prim))
+  (list (list "doIfElse"
+              (list "=" (list "getParam" "n") 1)
+              (list (list "setVariable:to:"
+                          "return"
+                          (list prim 0 (chimera-vary-arg 0))))
+              (list (list "setVariable:to:"
+                          "return"
+                          (list prim (chimera-vary-arg 0) (chimera-vary-arg 1)))
+                    '("setVariable:to:" "i" 2)
+                    (list "doRepeat"
+                          (list "-" '("getParam" "n") 2)
+                          (list "setVariable:to:"
+                                "return"
+                                (list prim
+                                      (list "readVariable" "return")
+                                      (chimera-vary-arg '("readVariable" "i"))))
+                          '("changeVar:by:" "i" 1))))))
 
 (pretty-print (chimera-entry (first (rest (read)))))
