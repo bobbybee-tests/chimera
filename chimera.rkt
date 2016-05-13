@@ -167,9 +167,14 @@
 (define (chimera-dispatch program)
   (list '("procDef" "call %n" ("n") (0) #f)
         (chimera-dlog2 '("getParam" "n")
-                       (xmap chimera-dispatch-lambda (third program))
+                       (append (xmap chimera-dispatch-lambda (third program))
+                               (chimera-primitives))
                        0)
         '("changeVar:by:" "sp" ("getParam" "n"))))
+
+(define (nearest-pow2 n)
+  (inexact->exact 
+    (- (round (exp (* (log 2) (round (+ (/ (log n) (log 2)) 0.5))))) n)))
 
 (define (chimera-dlog2 test conditions start)
   (cond 
@@ -182,11 +187,15 @@
     [(even? (length conditions))
      (let ([hlen (/ (length conditions) 2)])
        (list "doIfElse"
-             (list ">" test hlen)
+             (list ">" test (- (+ start hlen) 1))
              (chimera-dlog2 test (drop conditions hlen) (+ start hlen))
              (chimera-dlog2 test (take conditions hlen) start)))]
     [(odd? (length conditions))
-     (chimera-dlog2 test (append conditions '()) start)]))
+     (chimera-dlog2 test
+                    (append conditions
+                            (make-list (nearest-pow2 (length conditions))
+                                       '()))
+                    start)]))
 
 (define (chimera-dispatch-lambda l n)
   (display "Senor lambda: \n")
@@ -204,5 +213,18 @@
       (xmap (lambda (x n) (list "getLine:ofList:"
                                 (list "-" (list "readVariable" "sp") n)
                                 "memory")) args))))
+
+; primitives are implemented a bit more roundabout
+; this is to ensure that they can be called by reference correct
+
+(define (chimera-primitives)
+  (map chimera-primitive-vary (list "+" "-" "*" "/")))
+
+(define (chimera-primitive-vary prim)
+  (case prim
+    [("+" "-" "*" "/") (chimera-arithm-vary prim)]))
+
+(define (chimera-arithm-vary prim)
+  (pretty-print prim))
 
 (pretty-print (chimera-entry (first (rest (read)))))
