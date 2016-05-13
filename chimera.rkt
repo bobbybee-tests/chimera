@@ -37,17 +37,19 @@
                                    (list (list "changeVar:by:"
                                                "sp"
                                                (- (hash-ref ctx 'ssize))))
-                                   ctx)))
+                                   ctx
+                                   (list "changeVar:by:"
+                                         "sp"
+                                         (hash-ref ctx 'ssize)))))
        
-(define (chimera-compile-internal block emission ctx)
+(define (chimera-compile-internal block emission ctx a)
   (if (empty? block)
-    (list (reverse (cons (list "changeVar:by:" "sp" (hash-ref ctx 'ssize))
-                         emission))
-          ctx)
+    (list (reverse (cons a emission)) ctx)
     (let ([line (chimera-line (first block) ctx)])
       (chimera-compile-internal (rest block)
                                 (append (first line) emission)
-                                (second line)))))
+                                (second line)
+                                a))))
 
 (define (chimera-line line ctx)
   (if (equal? (first line) "=")
@@ -254,17 +256,21 @@
                 "doIfElse"
                 (chimera-identifier (second value) ctx)
                 (first (chimera-compile-internal (fourth value) 
-                                                 (list (list 
-                                                         "setVariable:to:"
-                                                         "phi"
-                                                         (third value)))
-                                                 ctx))
-                (first (chimera-compile-internal (sixth value)
-                                                 (list (list
-                                                         "setVariable:to:"
-                                                         "phi"
-                                                         (fifth value)))
-                                                 ctx))))
+                                                 '()
+                                                 ctx
+                                                 (list "setVariable:to:"
+                                                       "phi"
+                                                       (chimera-identifier
+                                                         (third value)
+                                                         ctx))))
+                (first (chimera-compile-internal (sixth value) 
+                                                 '()
+                                                 ctx
+                                                 (list "setVariable:to:"
+                                                       "phi"
+                                                       (chimera-identifier
+                                                         (fifth value)
+                                                         ctx))))))
               ctx))
 
 (pretty-print (chimera-entry (first (rest (read)))))
