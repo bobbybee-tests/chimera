@@ -6,24 +6,18 @@
 (require racket)
 
 (define (chimera-entry program)
-  (pretty-print (first (third program)))
   (let ([ctx (hash 'distance 0
                    'lambdas (map (lambda (x) (first (first x)))
                                  (third program))
                    'ssize (fourth program))])
-    (cons (chimera-compile (first (first program)) ctx)
-          (chimera-lambdas (third program) ctx '() 0))))
-  
+    (cons (chimera-dispatch program)
+      (cons (chimera-compile (first (first program)) ctx)
+            (chimera-lambdas (third program) ctx '() 0)))))
+
 (define (chimera-lambdas lambdas ctx emission n)
-  (display "asd\n")
-  (pretty-print lambdas)
   (if (empty? lambdas)
     emission
     (let ([l (first lambdas)])
-      (display "S\n")
-      (pretty-print (first l))
-      (display "R\n")
-      (pretty-print (rest l))
       (chimera-lambdas (rest lambdas)
                        ctx
                        (cons (list 0 0 (cons (list "procDef"
@@ -46,8 +40,6 @@
                                    ctx)))
        
 (define (chimera-compile-internal block emission ctx)
-  (display "Block: \n")
-  (pretty-print block)
   (if (empty? block)
     (list (reverse (cons (list "changeVar:by:" "sp" (hash-ref ctx 'ssize))
                          emission))
@@ -63,12 +55,7 @@
       (chimera-target (second line) ctx expression))
     (display "Unknown command\n")))
 
-; this is broken; rewrite later to be better
-
 (define (chimera-target target ctx value)
-  (display "YO: ")
-  (pretty-print target)
-  (pretty-print ctx)
   (case (first target)
     [("stack") (list (cons (list "setLine:ofList:to:"
                                  (chimera-calculate-stack (second target) ctx)
@@ -152,7 +139,6 @@
     [else (pretty-print identifier)]))
 
 (define (chimera-resolve-closure identifier ctx)
-  (pretty-print ctx) ;TODO
   (list "getParam" identifier))
 
 (define (chimera-primitive name)
@@ -171,5 +157,31 @@
                                          "memory"
                                          (first lst))
                                    emission)))))
+
+(define (chimera-dispatch program)
+  (list '("procDef" "call %n" ("n") (0) #f)
+        (chimera-dlog2 '("getParam" "n")
+                       (map chimera-dispatch-lambda (third program))
+                       0)))
+
+(define (chimera-dlog2 test conditions start)
+  (cond 
+    [(empty? conditions)
+     '()]
+    [(= (length conditions) 1)
+     (first conditions)]
+    [(= (length conditions) 2)
+     (append (list "doIfElse" (list "=" test start)) conditions)]
+    [(even? (length conditions))
+     (let ([hlen (/ (length conditions) 2)])
+       (list "doIfElse"
+             (list ">" test hlen)
+             (chimera-dlog2 test (drop conditions hlen) (+ start hlen))
+             (chimera-dlog2 test (take conditions hlen) start)))]
+    [(odd? (length conditions))
+     (chimera-dlog2 test (append conditions '()) start)]))
+
+(define (chimera-dispatch-lambda l)
+  (pretty-print l))
 
 (pretty-print (chimera-entry (first (rest (read)))))
