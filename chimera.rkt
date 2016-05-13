@@ -133,6 +133,7 @@
 (define (chimera-identifier identifier ctx)
   (case (first identifier)
     [("imm") (second identifier)]
+    [("immbool") (if (second identifier) '(not (not)) '(not))]
     [("global") "global"]
     [("closure") (chimera-resolve-closure (second identifier) ctx)]
     [("stack") (chimera-access-stack (second identifier) ctx)]
