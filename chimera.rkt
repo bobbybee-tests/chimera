@@ -201,6 +201,8 @@
     (list "TODO impartial")
     (if (member '... args)
       (list "TODO variadic")
-      args)))
+      (xmap (lambda (x n) (list "getLine:ofList:"
+                                (list "-" (list "readVariable" "sp") n)
+                                "memory")) args))))
 
 (pretty-print (chimera-entry (first (rest (read)))))
