@@ -162,7 +162,8 @@
   (list '("procDef" "call %n" ("n") (0) #f)
         (chimera-dlog2 '("getParam" "n")
                        (map chimera-dispatch-lambda (third program))
-                       0)))
+                       0)
+        '("changeVar:by:" "sp" ("getParam" "n"))))
 
 (define (chimera-dlog2 test conditions start)
   (cond 
