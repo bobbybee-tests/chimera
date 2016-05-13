@@ -158,10 +158,16 @@
                                          (first lst))
                                    emission)))))
 
+(define (xmap f l)
+  (reverse (xmap-int f l '() 0)))
+
+(define (xmap-int f h e n)
+  (if (empty? h) e (xmap-int f (rest h) (cons (f (first h) n) e) (+ n 1))))
+
 (define (chimera-dispatch program)
   (list '("procDef" "call %n" ("n") (0) #f)
         (chimera-dlog2 '("getParam" "n")
-                       (map chimera-dispatch-lambda (third program))
+                       (xmap chimera-dispatch-lambda (third program))
                        0)
         '("changeVar:by:" "sp" ("getParam" "n"))))
 
@@ -182,8 +188,12 @@
     [(odd? (length conditions))
      (chimera-dlog2 test (append conditions '()) start)]))
 
-(define (chimera-dispatch-lambda l)
+(define (chimera-dispatch-lambda l n)
   (display "Senor lambda: \n")
-  (pretty-print l))
+  (display n)
+  (pretty-print l)
+
+  ; TODO: arguments in order, in conformance to variadic functions
+  (list (list "call" (chimera-lambda-spec n l))))
 
 (pretty-print (chimera-entry (first (rest (read)))))
