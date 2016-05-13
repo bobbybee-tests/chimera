@@ -165,7 +165,7 @@
                        (hash-set ctx 'distance (+ (hash-ref ctx 'distance) 1))
                        (cons (list "changeVar:by:"
                                    "sp"
-                                   1)
+                                   -1)
                              (cons (list "setLine:ofList:to:"
                                          (list "readVariable" "sp")
                                          "memory"
