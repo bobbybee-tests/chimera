@@ -183,6 +183,7 @@
      (chimera-dlog2 test (append conditions '()) start)]))
 
 (define (chimera-dispatch-lambda l)
+  (display "Senor lambda: \n")
   (pretty-print l))
 
 (pretty-print (chimera-entry (first (rest (read)))))
