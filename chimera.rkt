@@ -26,7 +26,7 @@
       (pretty-print (rest l))
       (chimera-lambdas (rest lambdas)
                        ctx
-                       (cons (cons (list "procDef"
+                       (cons (list 0 0 (cons (list "procDef"
                                          (chimera-lambda-spec n (first (first l)))
                                          (chimera-arg-names (first (first l)))
                                          (chimera-arg-defaults (first (first l)))
@@ -34,17 +34,17 @@
                                    (chimera-compile (rest (first l))
                                                     (hash-set ctx
                                                               'ssize
-                                                              (first (second l)))))
+                                                              (first (second l))))))
                              emission)
                        (+ n 1)))))
 
 (define (chimera-compile block ctx)
-  (chimera-compile-internal block
-                            (list (list "changeVar:by:"
-                                        "sp"
-                                        (- (hash-ref ctx 'ssize))))
-                            ctx))
-
+  (first (chimera-compile-internal block
+                                   (list (list "changeVar:by:"
+                                               "sp"
+                                               (- (hash-ref ctx 'ssize))))
+                                   ctx)))
+       
 (define (chimera-compile-internal block emission ctx)
   (display "Block: \n")
   (pretty-print block)
