@@ -74,6 +74,7 @@
   (case (first value)
     [("call") (chimera-call value ctx)]
     [("stack") (list (chimera-access-stack (second value) ctx) '() ctx)]
+    [("if") (chimera-branch value ctx)]
     [(else) (display "Unknown value type\n")]))
 
 ; (identifier prefix ctx)
@@ -244,5 +245,26 @@
                                       (list "readVariable" "return")
                                       (chimera-vary-arg '("readVariable" "i"))))
                           '("changeVar:by:" "i" 1))))))
+
+; TODO: figure out what contexts to use
+
+(define (chimera-branch value ctx)
+  (list '("readVariable" "phi")
+        (list (list
+                "doIfElse"
+                (chimera-identifier (second value) ctx)
+                (first (chimera-compile-internal (fourth value) 
+                                                 (list (list 
+                                                         "setVariable:to:"
+                                                         "phi"
+                                                         (third value)))
+                                                 ctx))
+                (first (chimera-compile-internal (sixth value)
+                                                 (list (list
+                                                         "setVariable:to:"
+                                                         "phi"
+                                                         (fifth value)))
+                                                 ctx))))
+              ctx))
 
 (pretty-print (chimera-entry (first (rest (read)))))
