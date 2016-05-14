@@ -11,7 +11,7 @@
                                  (third program))
                    'ssize (fourth program))])
     (cons (chimera-dispatch program)
-      (cons (chimera-compile (first (first program)) ctx)
+      (cons (chimera-compile (first program) ctx)
             (chimera-lambdas (third program) ctx '() 0)))))
 
 (define (chimera-lambdas lambdas ctx emission n)
