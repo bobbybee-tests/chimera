@@ -223,6 +223,19 @@
 (define (chimera-primitives)
   (map chimera-primitive-vary (list "+" "-" "*" "/")))
 
+(define (chimera-primitive-environment ctx)
+  (chimera-primenv-int '("+" "-" "*" "/") ctx) (length (hash-ref ctx 'lambdas)))
+
+(define (chimera-primenv-int prims ctx n)
+  (if (empty? prim)
+    ctx
+    (chimera-primenv-int (rest prims)
+                         (hash-set ctx 'globals
+                                   (hash-set (hash-ref ctx 'globals)
+                                             (first prims)
+                                             n))
+                         (+ n 1))))
+
 (define (chimera-primitive-vary prim)
   (case prim
     [("+" "-" "*" "/") (chimera-arithm-vary prim)]))
