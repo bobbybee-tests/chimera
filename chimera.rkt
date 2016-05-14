@@ -12,7 +12,10 @@
                                  (third program))
                    'ssize (fourth program))])
     (cons (list 0 0 (chimera-dispatch program))
-      (cons (list 0 0 (chimera-compile (first program) ctx))
+      (cons (list 0 0 (append '(("setVar:to:" "sp" 4096)
+                                ("deleteLine:ofList:" "all" "memory")
+                                ("doRepeat" 4096 (("append:toList:" 0 "memory"))))
+                              (chimera-compile (first program) ctx)))
             (chimera-lambdas (third program) ctx '() 0)))))
 
 (define (chimera-lambdas lambdas ctx emission n)
@@ -104,7 +107,7 @@
         (let* ([l (chimera-identifier (second value) ctx)]
                [push (chimera-push-list args ctx '())])
           (list (list "readVariable" "return")
-                (cons (list "call" "call %n" l (length args))
+                (cons (list "call" "call %s %n" l (length args))
                       (first push))
                 (second push)))))))
 
@@ -170,11 +173,11 @@
   (if (empty? h) e (xmap-int f (rest h) (cons (f (first h) n) e) (+ n 1))))
 
 (define (chimera-dispatch program)
-  (list '("procDef" "call %n" ("n") (0) #f)
-        (chimera-dlog2 '("getParam" "n")
+  (list '("procDef" "call %s %n" ("p" "n") (0) #f)
+        (first (chimera-dlog2 '("getParam" "p")
                        (append (xmap chimera-dispatch-lambda (third program))
                                (chimera-primitives))
-                       0)
+                       0))
         '("changeVar:by:" "sp" ("getParam" "n"))))
 
 (define (nearest-pow2 n)
@@ -188,13 +191,13 @@
     [(= (length conditions) 1)
      (first conditions)]
     [(= (length conditions) 2)
-     (append (list "doIfElse" (list "=" test start)) conditions)]
+     (list (append (list "doIfElse" (list "=" test start)) conditions))]
     [(even? (length conditions))
      (let ([hlen (/ (length conditions) 2)])
-       (list "doIfElse"
-             (list ">" test (- (+ start hlen) 1))
-             (chimera-dlog2 test (drop conditions hlen) (+ start hlen))
-             (chimera-dlog2 test (take conditions hlen) start)))]
+       (list (list "doIfElse"
+                   (list ">" test (- (+ start hlen) 1))
+                   (chimera-dlog2 test (drop conditions hlen) (+ start hlen))
+                   (chimera-dlog2 test (take conditions hlen) start))))]
     [(odd? (length conditions))
      (chimera-dlog2 test
                     (append conditions
@@ -230,21 +233,21 @@
 (define (chimera-arithm-vary prim)
   (list (list "doIfElse"
               (list "=" (list "getParam" "n") 1)
-              (list (list "setVariable:to:"
+              (list (list "setVar:to:"
                           "return"
                           (list prim 0 (chimera-vary-arg 0))))
-              (list (list "setVariable:to:"
+              (list (list "setVar:to:"
                           "return"
                           (list prim (chimera-vary-arg 0) (chimera-vary-arg 1)))
-                    '("setVariable:to:" "i" 2)
+                    '("setVar:to:" "i" 2)
                     (list "doRepeat"
                           (list "-" '("getParam" "n") 2)
-                          (list "setVariable:to:"
-                                "return"
-                                (list prim
-                                      (list "readVariable" "return")
-                                      (chimera-vary-arg '("readVariable" "i"))))
-                          '("changeVar:by:" "i" 1))))))
+                          (list (list "setVar:to:"
+                                      "return"
+                                      (list prim
+                                            (list "readVariable" "return")
+                                            (chimera-vary-arg '("readVariable" "i"))))
+                          '("changeVar:by:" "i" 1)))))))
 
 ; TODO: figure out what contexts to use
 
@@ -256,7 +259,7 @@
                 (first (chimera-compile-internal (fourth value) 
                                                  '()
                                                  ctx
-                                                 (list "setVariable:to:"
+                                                 (list "setVar:to:"
                                                        "phi"
                                                        (chimera-identifier
                                                          (third value)
@@ -264,7 +267,7 @@
                 (first (chimera-compile-internal (sixth value) 
                                                  '()
                                                  ctx
-                                                 (list "setVariable:to:"
+                                                 (list "setVar:to:"
                                                        "phi"
                                                        (chimera-identifier
                                                          (fifth value)
@@ -284,6 +287,17 @@
        (videoAlpha . 0.5)
        (children . ())
        (scripts . ,(chimera-entry (first (rest (read)))))
+       (variables . (#hash((name . "sp")
+                           (value . 0)
+                           (isPersistent . #f))))
+       (lists . (#hash((listName . "memory")
+                       (contents . ())
+                       (isPersistent . #f)
+                       (x . 0)
+                       (y . 0)
+                       (width . 128)
+                       (height . 128)
+                       (visible . #f))))
        (info . #hash((scriptCount . 0)
                        (flashVersion . "MAC 11,8,800,94")
                        (spriteCount . 0)
