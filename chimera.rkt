@@ -11,8 +11,8 @@
                    'lambdas (map (lambda (x) (first (first x)))
                                  (third program))
                    'ssize (fourth program))])
-    (cons (chimera-dispatch program)
-      (cons (chimera-compile (first program) ctx)
+    (cons (list 0 0 (chimera-dispatch program))
+      (cons (list 0 0 (chimera-compile (first program) ctx))
             (chimera-lambdas (third program) ctx '() 0)))))
 
 (define (chimera-lambdas lambdas ctx emission n)
@@ -104,7 +104,7 @@
         (let* ([l (chimera-identifier (second value) ctx)]
                [push (chimera-push-list args ctx '())])
           (list (list "readVariable" "return")
-                (cons (list "call" "call" l (length args))
+                (cons (list "call" "call %n" l (length args))
                       (first push))
                 (second push)))))))
 
@@ -289,6 +289,7 @@
                        (spriteCount . 0)
                        (swfVersion . "v341")
                        (videoOn . #f)
+                       (projectID . 109636961)
                        (userAgent . "Chimera")
                        (hasCloudData . #f)))))
 
