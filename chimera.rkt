@@ -7,12 +7,14 @@
 (require json)
 
 (define (chimera-entry program)
-  (let ([ctx (hash 'distance 0
-                   'lambdas (map (lambda (x) (first (first x)))
-                                 (third program))
-                   'ssize (fourth program))])
+  (let* ([sctx (hash 'distance 0
+                     'lambdas (map (lambda (x) (first (first x)))
+                                   (third program))
+                     'ssize (fourth program)
+                     'globals (hash))]
+         [ctx (chimera-primitive-environment sctx)])
     (cons (list 0 0 (chimera-dispatch program))
-      (cons (list 0 0 (append '(("setVar:to:" "sp" 4096)
+      (cons (list 0 0 (append '(("setVar:to:" "sp" 096)
                                 ("deleteLine:ofList:" "all" "memory")
                                 ("doRepeat" 4096 (("append:toList:" 0 "memory"))))
                               (chimera-compile (first program) ctx)))
@@ -141,7 +143,7 @@
   (case (first identifier)
     [("imm") (second identifier)]
     [("immbool") (if (second identifier) '(not (not)) '(not))]
-    [("global") "global"]
+    [("global") (hash-ref (hash-ref ctx 'globals) (second identifier))]
     [("closure") (chimera-resolve-closure (second identifier) ctx)]
     [("stack") (chimera-access-stack (second identifier) ctx)]
     [else (pretty-print identifier)]))
@@ -224,10 +226,10 @@
   (map chimera-primitive-vary (list "+" "-" "*" "/")))
 
 (define (chimera-primitive-environment ctx)
-  (chimera-primenv-int '("+" "-" "*" "/") ctx) (length (hash-ref ctx 'lambdas)))
+  (chimera-primenv-int '(+ - * /) ctx (length (hash-ref ctx 'lambdas))))
 
 (define (chimera-primenv-int prims ctx n)
-  (if (empty? prim)
+  (if (empty? prims)
     ctx
     (chimera-primenv-int (rest prims)
                          (hash-set ctx 'globals
@@ -319,5 +321,5 @@
                        (projectID . 109636961)
                        (userAgent . "Chimera")
                        (hasCloudData . #f)))))
-(pretty-print out)
-;(write-json out)
+;(pretty-print (hash-ref out 'scripts))
+(write-json out)
