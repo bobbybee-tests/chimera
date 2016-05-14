@@ -113,7 +113,7 @@
     (list "TODO impartial")
     (if (member '... l)
       (list "TODO variadic")
-      l)))
+      (map symbol->string l))))
 
 (define (chimera-arg-defaults l)
   (map (lambda (x) 0) (chimera-arg-names l)))
@@ -144,7 +144,7 @@
     [else (pretty-print identifier)]))
 
 (define (chimera-resolve-closure identifier ctx)
-  (list "getParam" identifier))
+  (list "getParam" (symbol->string identifier)))
 
 (define (chimera-primitive name)
   #f)
@@ -292,4 +292,4 @@
                        (userAgent . "Chimera")
                        (hasCloudData . #f)))))
 
-(pretty-print out)
+(write-json out)
